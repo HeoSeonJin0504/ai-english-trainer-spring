@@ -1,4 +1,4 @@
-package com.example.aienglishtrainer;
+package com.example.aienglishtrainer.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
