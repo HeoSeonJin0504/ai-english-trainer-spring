@@ -1,5 +1,6 @@
 package com.example.aienglishtrainer.config;
 
+import com.example.aienglishtrainer.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
@@ -18,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
     private final CorsConfigurationSource corsConfigurationSource;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -28,7 +31,7 @@ public class SecurityConfig {
                 // CSRF 비활성화 (REST API는 불필요)
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // 세션 사용 안 함 (JWT 사용 예정)
+                // 세션 사용 안 함 (JWT 사용)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
@@ -40,11 +43,18 @@ public class SecurityConfig {
 
                 // URL별 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 인증 없이 접근 가능
-                        .requestMatchers("/", "/api/auth/**").permitAll()
-                        // 나머지는 인증 필요 (나중에 JWT 추가 후 적용)
-                        .anyRequest().permitAll()  // 임시로 전체 허용
-                );
+                        // 인증 없이 접근 가능한 경로
+                        .requestMatchers(
+                                "/",
+                                "/api/auth/**"
+                        ).permitAll()
+                        // 나머지는 인증 필요
+                        .anyRequest().authenticated()
+                )
+
+                // JWT 필터 추가
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
