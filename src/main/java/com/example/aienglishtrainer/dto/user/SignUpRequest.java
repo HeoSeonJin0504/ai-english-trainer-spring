@@ -25,8 +25,10 @@ public class SignUpRequest {
     @Email(message = "올바른 이메일 형식이 아닙니다.")
     private String email;  // NULL 허용
 
+    @NotNull(message = "성별은 필수입니다.")
     private Gender gender;
 
+    @NotNull(message = "나이는 필수입니다.")
     @Min(value = 1, message = "나이는 1세 이상이어야 합니다.")
     @Max(value = 150, message = "올바른 나이를 입력해주세요.")
     private Integer age;

@@ -32,10 +32,10 @@ public class User {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 10)
+    @Column(nullable = false, length = 10)
     private Gender gender;
 
-    @Column
+    @Column(nullable = false)
     private Integer age;
 
     @CreationTimestamp
