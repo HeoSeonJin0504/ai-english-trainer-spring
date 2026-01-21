@@ -237,54 +237,66 @@ public class OpenAiService {
     // 토익 문제 생성 프롬프트
     private String buildToeicPrompt(String topic) {
         return String.format("""
-            당신은 토익(TOEIC) 문제를 전문적으로 출제하는 AI입니다.
-            반드시 아래 형식을 지키고, JSON만 출력하세요.
+        당신은 토익(TOEIC) 문제를 전문적으로 출제하는 AI입니다.
+        반드시 아래 형식을 지키고, JSON만 출력하세요.
 
-            총 6개의 문제를 아래와 같이 출제하세요:
+        총 6개의 문제를 아래와 같이 출제하세요:
 
-            📌 Part 5 - 문법 빈칸 문제(2문항)
-            📌 Part 6 - 문장 삽입 문제(2문항)
-            📌 Part 7 - 독해 문제(2문항)
+        📌 Part 5 - 문법 빈칸 문제(2문항)
+        - 각 문장에 빈칸(____) 1개 포함
+        - 4지선다
+        - 해설(explanation)은 반드시 한국어로 작성
 
-            ⚠️ 반드시 JSON ONLY로 출력하세요.
+        📌 Part 6 - 문장 삽입 문제(2문항)
+        - 반드시 passage에 [1], [2], [3], [4] 위치 표시 포함
+        - 예시: "첫번째 문장. [1] 두번째 문장. [2] 세번째 문장. [3] 네번째 문장. [4]"
+        - insertSentence: 삽입할 문장
+        - 정답은 A([1]), B([2]), C([3]), D([4]) 중 하나
+        - 해설(explanation)은 반드시 한국어로 작성
 
-            {
-              "mode": "toeic",
-              "questions": {
-                "part5": [
-                  {
-                    "question": "",
-                    "options": { "A": "", "B": "", "C": "", "D": "" },
-                    "answer": "",
-                    "explanation": ""
-                  }
-                ],
-                "part6": [
-                  {
-                    "passage": "",
-                    "insertSentence": "",
-                    "question": "Where should the sentence be inserted?",
-                    "options": { "A": "[1]", "B": "[2]", "C": "[3]", "D": "[4]" },
-                    "answer": "",
-                    "explanation": ""
-                  }
-                ],
-                "part7": [
-                  {
-                    "passage": "",
-                    "question": "",
-                    "options": { "A": "", "B": "", "C": "", "D": "" },
-                    "answer": "",
-                    "explanation": ""
-                  }
-                ]
+        📌 Part 7 - 독해 문제(2문항)
+        - 짧은 지문 + 문제 + 4지선다
+        - 해설(explanation)은 반드시 한국어로 작성
+
+        ⚠️ 반드시 JSON ONLY로 출력하세요.
+
+        {
+          "mode": "toeic",
+          "questions": {
+            "part5": [
+              {
+                "question": "문장에 ____ 빈칸 포함",
+                "options": { "A": "", "B": "", "C": "", "D": "" },
+                "answer": "",
+                "explanation": "한국어 해설"
               }
-            }
+            ],
+            "part6": [
+              {
+                "passage": "문장1. [1] 문장2. [2] 문장3. [3] 문장4. [4]",
+                "insertSentence": "삽입할 문장",
+                "question": "Where should the sentence be inserted?",
+                "options": { "A": "[1]", "B": "[2]", "C": "[3]", "D": "[4]" },
+                "answer": "B",
+                "explanation": "한국어 해설"
+              }
+            ],
+            "part7": [
+              {
+                "passage": "지문 내용",
+                "question": "질문",
+                "options": { "A": "", "B": "", "C": "", "D": "" },
+                "answer": "",
+                "explanation": "한국어 해설"
+              }
+            ]
+          }
+        }
 
-            "%s"을 반영하여 자연스럽게 출제하세요.
-            해설(explanation)은 반드시 한국어로 작성하세요.
-            출력은 반드시 JSON만 포함해야 하며, 그 외의 텍스트는 절대 포함하지 마세요.
-            """, topic);
+        "%s"을 반영하여 자연스럽게 출제하세요.
+        Part 6의 passage에는 반드시 [1], [2], [3], [4] 위치 표시를 포함하세요!
+        출력은 반드시 JSON만 포함해야 하며, 그 외의 텍스트는 절대 포함하지 마세요.
+        """, topic);
     }
 
     // 영작 문제 생성 프롬프트
