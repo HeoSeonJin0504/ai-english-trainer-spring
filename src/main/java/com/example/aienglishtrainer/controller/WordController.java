@@ -1,9 +1,9 @@
 package com.example.aienglishtrainer.controller;
 
 import com.example.aienglishtrainer.dto.ApiResponse;
-import com.example.aienglishtrainer.dto.vocabulary.VocabularyRequest;
-import com.example.aienglishtrainer.dto.vocabulary.VocabularyResponse;
-import com.example.aienglishtrainer.service.VocabularyService;
+import com.example.aienglishtrainer.dto.word.WordRequest;
+import com.example.aienglishtrainer.dto.word.WordResponse;
+import com.example.aienglishtrainer.service.WordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,16 +15,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/words")
 @RequiredArgsConstructor
-public class VocabularyController {
+public class WordController {
 
-    private final VocabularyService vocabularyService;
+    private final WordService wordService;
 
     // 단어 저장
     @PostMapping
-    public ResponseEntity<ApiResponse<VocabularyResponse>> saveWord(
-            @Valid @RequestBody VocabularyRequest request) {
+    public ResponseEntity<ApiResponse<WordResponse>> saveWord(
+            @Valid @RequestBody WordRequest request) {
 
-        VocabularyResponse response = vocabularyService.saveWord(request);
+        WordResponse response = wordService.saveWord(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("단어가 저장되었습니다.", response));
@@ -32,26 +32,26 @@ public class VocabularyController {
 
     // 내 단어 전체 조회
     @GetMapping
-    public ResponseEntity<ApiResponse<List<VocabularyResponse>>> getMyWords() {
-        List<VocabularyResponse> words = vocabularyService.getMyWords();
+    public ResponseEntity<ApiResponse<List<WordResponse>>> getMyWords() {
+        List<WordResponse> words = wordService.getMyWords();
         return ResponseEntity.ok(ApiResponse.success(words));
     }
 
     // 단어 검색
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<VocabularyResponse>>> searchWords(
+    public ResponseEntity<ApiResponse<List<WordResponse>>> searchWords(
             @RequestParam String keyword) {
 
-        List<VocabularyResponse> words = vocabularyService.searchWords(keyword);
+        List<WordResponse> words = wordService.searchWords(keyword);
         return ResponseEntity.ok(ApiResponse.success(words));
     }
 
     // 단어 상세 조회
     @GetMapping("/{wordId}")
-    public ResponseEntity<ApiResponse<VocabularyResponse>> getWord(
+    public ResponseEntity<ApiResponse<WordResponse>> getWord(
             @PathVariable Long wordId) {
 
-        VocabularyResponse response = vocabularyService.getWord(wordId);
+        WordResponse response = wordService.getWord(wordId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -60,14 +60,14 @@ public class VocabularyController {
     public ResponseEntity<ApiResponse<Void>> deleteWord(
             @PathVariable Long wordId) {
 
-        vocabularyService.deleteWord(wordId);
+        wordService.deleteWord(wordId);
         return ResponseEntity.ok(ApiResponse.success("단어가 삭제되었습니다."));
     }
 
-    // 내 단어 개수 조회
+    // 단어 개수 조회
     @GetMapping("/count")
     public ResponseEntity<ApiResponse<Long>> getWordCount() {
-        long count = vocabularyService.getWordCount();
+        long count = wordService.getWordCount();
         return ResponseEntity.ok(ApiResponse.success(count));
     }
 }
