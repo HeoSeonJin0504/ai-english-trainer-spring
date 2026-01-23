@@ -52,3 +52,7 @@ logs/
 
 # Windows
 Thumbs.db
+
+### Google Cloud ###
+**/google-credentials.json
+**/credentials.json
