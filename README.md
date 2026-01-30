@@ -57,11 +57,11 @@ CREATE DATABASE english_trainer;
 ```
 
 ### 2. 환경변수 설정
-`application-local.yml.example` 파일을 참고하여 `application-local.yml` 파일을 생성합니다.
+`application-local.yaml.example` 파일을 참고하여 `application-local.yaml` 파일을 생성합니다.
 ```bash
 cd src/main/resources
-cp application-local.yml.example application-local.yml
-# application-local.yml.example을 참고하여 application-local.yml 파일 설정
+cp application-local.yaml.example application-local.yaml
+# application-local.yaml.example을 참고하여 application-local.yaml 파일 설정
 ```
 
 ### 3. Google Cloud TTS 설정 (선택)
@@ -90,7 +90,7 @@ Started AiEnglishTrainerApplication in X.XXX seconds
 ### 주의사항
 - OpenAI API 키는 유료 사용량에 따라 과금됩니다
 - Google TTS API는 사용량에 따라 과금됩니다
-- `application-local.yml` 파일은 절대 Git에 커밋하지 마세요
+- `application-local.yaml` 파일은 절대 Git에 커밋하지 마세요
 
 ## 저장소
 본 프로젝트는 3개의 저장소로 구성되어 있습니다:
