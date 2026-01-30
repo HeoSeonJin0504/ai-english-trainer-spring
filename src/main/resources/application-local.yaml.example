@@ -1,0 +1,32 @@
+spring:
+  # MySQL 설정
+  datasource:
+    url: jdbc:mysql://localhost:3306/english_trainer?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    username: root
+    password: {MySQL 비밀번호}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: update # 테이블 자동 생성 및 수정
+    show-sql: true # SQL 로그 출력
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+# JWT 인증 설정
+jwt:
+  secret: {32자 이상의 비밀키}
+  expiration: 86400000 # 토큰 만료 시간 (밀리초, 86400000 = 24시간)
+
+# OpenAI API 설정
+openai:
+  api-key: {OpenAI API 키}
+  model: gpt-4o-mini
+
+# Google Cloud TTS 설정 (선택, 미설정 시 Web Speech API로 대체)
+google:
+  cloud:
+    credentials-path: ./config/google-credentials.json
