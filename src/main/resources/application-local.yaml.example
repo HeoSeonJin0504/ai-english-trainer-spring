@@ -14,7 +14,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
 
 # JWT 인증 설정
 jwt:
