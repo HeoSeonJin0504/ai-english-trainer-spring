@@ -97,7 +97,7 @@ Started AiEnglishTrainerApplication in X.XXX seconds
 
 - **백엔드 (Java Spring Boot)** - 현재 저장소
     - OpenAI GPT 연동, TTS, 데이터 관리, API 서버
-    - 
+  
 - **프론트엔드 (React)**
     - https://github.com/HeoSeonJin0504/ai-english-trainer-front.git
   
