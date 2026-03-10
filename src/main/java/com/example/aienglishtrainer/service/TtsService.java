@@ -29,10 +29,17 @@ public class TtsService {
                     HttpStatus.SERVICE_UNAVAILABLE);
         }
 
+        // voice 값 null-safe 처리 (null 또는 빈 값이면 female 기본값)
+        String voiceParam = (request.getVoice() != null && !request.getVoice().isBlank())
+                ? request.getVoice().toLowerCase().trim()
+                : "female";
+
         // 음성 선택
-        String voiceName = request.getVoice().equals("male")
+        String voiceName = voiceParam.equals("male")
                 ? "en-US-Neural2-D"   // 남성 음성
-                : "en-US-Neural2-J";  // 여성 음성
+                : "en-US-Neural2-F";  // 여성 음성
+
+        log.info("TTS 요청 - voice 파라미터: '{}', 선택된 음성: {}", voiceParam, voiceName);
 
         // 속도 제한 (0.5 ~ 2.0)
         double speed = Math.max(0.5, Math.min(2.0,
@@ -47,6 +54,9 @@ public class TtsService {
         VoiceSelectionParams voice = VoiceSelectionParams.newBuilder()
                 .setLanguageCode("en-US")
                 .setName(voiceName)
+                .setSsmlGender(voiceParam.equals("male")
+                        ? SsmlVoiceGender.MALE
+                        : SsmlVoiceGender.FEMALE)
                 .build();
 
         // 오디오 설정
@@ -65,8 +75,7 @@ public class TtsService {
         ByteString audioContents = response.getAudioContent();
         String audioBase64 = Base64.getEncoder().encodeToString(audioContents.toByteArray());
 
-        log.info("TTS 생성 완료: {}자 -> {} bytes",
-                request.getText().length(), audioContents.size());
+        log.info("TTS 생성 완료: {}자 -> {} bytes", request.getText().length(), audioContents.size());
 
         return TtsResponse.builder()
                 .audio(audioBase64)
