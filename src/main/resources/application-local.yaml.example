@@ -29,3 +29,7 @@ openai:
 google:
   cloud:
     credentials-path: ./config/google-credentials.json
+
+ # CORS 설정
+ cors:
+   allowed-origins: http://localhost:5173

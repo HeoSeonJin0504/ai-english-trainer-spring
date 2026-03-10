@@ -5,7 +5,6 @@ import com.example.aienglishtrainer.dto.tts.TtsRequest;
 import com.example.aienglishtrainer.dto.tts.TtsResponse;
 import com.example.aienglishtrainer.dto.tts.TtsStatusResponse;
 import com.example.aienglishtrainer.service.TtsService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +16,15 @@ public class TtsController {
 
     private final TtsService ttsService;
 
-    // 텍스트를 음성으로 변환
+    // TTS 음성 생성
     @PostMapping("/speak")
-    public ResponseEntity<ApiResponse<TtsResponse>> speak(
-            @Valid @RequestBody TtsRequest request) {
+    public ResponseEntity<ApiResponse<TtsResponse>> synthesizeSpeech(
+            @RequestBody TtsRequest request) {
+
+        if (request.getText() == null || request.getText().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("텍스트를 입력해주세요."));
+        }
 
         TtsResponse response = ttsService.synthesizeSpeech(request);
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -28,8 +32,8 @@ public class TtsController {
 
     // TTS 서비스 상태 확인
     @GetMapping("/status")
-    public ResponseEntity<ApiResponse<TtsStatusResponse>> status() {
-        TtsStatusResponse response = ttsService.checkStatus();
-        return ResponseEntity.ok(ApiResponse.success(response));
+    public ResponseEntity<ApiResponse<TtsStatusResponse>> checkStatus() {
+        TtsStatusResponse status = ttsService.checkStatus();
+        return ResponseEntity.ok(ApiResponse.success(status));
     }
 }

@@ -1,13 +1,12 @@
 package com.example.aienglishtrainer.controller;
 
-import com.example.aienglishtrainer.dto.ApiResponse;
-import com.example.aienglishtrainer.dto.chatbot.ChatRequest;
 import com.example.aienglishtrainer.dto.chatbot.ChatResponse;
 import com.example.aienglishtrainer.dto.chatbot.ConversationHistoryResponse;
 import com.example.aienglishtrainer.dto.chatbot.ConversationListResponse;
+import com.example.aienglishtrainer.dto.ApiResponse;
 import com.example.aienglishtrainer.security.SecurityUtil;
 import com.example.aienglishtrainer.service.ChatbotService;
-import jakarta.validation.Valid;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,64 +20,55 @@ public class ChatbotController {
 
     private final ChatbotService chatbotService;
 
-    /**
-     * 챗봇에게 메시지 전송
-     * POST /api/chat/message
-     */
+    // 메시지 전송
     @PostMapping("/message")
     public ResponseEntity<ApiResponse<ChatResponse>> sendMessage(
-            @Valid @RequestBody ChatRequest request) {
+            @RequestBody ChatMessageRequest request) {
 
-        // 현재 로그인한 사용자 ID
-        Long userId = SecurityUtil.getCurrentUserId();
+        // 메시지 유효성 검증
+        if (request.getMessage() == null || request.getMessage().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Message is required"));
+        }
+        if (request.getMessage().length() > 1000) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Message is too long (max 1000 characters)"));
+        }
 
+        String userId = SecurityUtil.getCurrentUsername();
         ChatResponse response = chatbotService.sendMessage(
-                userId.toString(),
-                request.getMessage(),
-                request.getConversationId()
-        );
+                userId, request.getMessage(), request.getConversationId());
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    /**
-     * 사용자의 모든 대화 목록 조회
-     * GET /api/chat/conversations
-     */
+    // 대화 목록 조회
     @GetMapping("/conversations")
     public ResponseEntity<ApiResponse<List<ConversationListResponse>>> getConversations() {
-        Long userId = SecurityUtil.getCurrentUserId();
-
-        List<ConversationListResponse> conversations =
-                chatbotService.getUserConversations(userId.toString());
-
+        String userId = SecurityUtil.getCurrentUsername();
+        List<ConversationListResponse> conversations = chatbotService.getUserConversations(userId);
         return ResponseEntity.ok(ApiResponse.success(conversations));
     }
 
-    /**
-     * 특정 대화 히스토리 조회
-     * GET /api/chat/history/{conversationId}
-     */
+    // 대화 히스토리 조회
     @GetMapping("/history/{conversationId}")
     public ResponseEntity<ApiResponse<ConversationHistoryResponse>> getHistory(
             @PathVariable String conversationId) {
-
-        ConversationHistoryResponse history =
-                chatbotService.getConversationHistory(conversationId);
-
+        ConversationHistoryResponse history = chatbotService.getConversationHistory(conversationId);
         return ResponseEntity.ok(ApiResponse.success(history));
     }
 
-    /**
-     * 대화 삭제
-     * DELETE /api/chat/{conversationId}
-     */
+    // 대화 삭제
     @DeleteMapping("/{conversationId}")
     public ResponseEntity<ApiResponse<Void>> deleteConversation(
             @PathVariable String conversationId) {
-
         chatbotService.deleteConversation(conversationId);
+        return ResponseEntity.ok(ApiResponse.success("대화가 삭제되었습니다.", null));
+    }
 
-        return ResponseEntity.ok(ApiResponse.success("대화가 삭제되었습니다."));
+    @Data
+    static class ChatMessageRequest {
+        private String message;
+        private String conversationId;
     }
 }

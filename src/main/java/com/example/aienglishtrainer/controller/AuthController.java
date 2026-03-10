@@ -2,10 +2,12 @@ package com.example.aienglishtrainer.controller;
 
 import com.example.aienglishtrainer.dto.ApiResponse;
 import com.example.aienglishtrainer.dto.user.*;
+import com.example.aienglishtrainer.security.JwtTokenProvider;
 import com.example.aienglishtrainer.service.AuthService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,44 +17,63 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<UserResponse>> signUp(
-            @Valid @RequestBody SignUpRequest request) {
-
-        UserResponse response = authService.signUp(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success("회원가입이 완료되었습니다.", response));
+    public ResponseEntity<ApiResponse<UserResponse>> signUp(@Valid @RequestBody SignUpRequest request) {
+        UserResponse userResponse = authService.signUp(request);
+        return ResponseEntity.ok(ApiResponse.success("회원가입이 완료되었습니다.", userResponse));
     }
 
-    // 로그인
+    // 로그인 - JWT를 httpOnly Cookie로 발급
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(
-            @Valid @RequestBody LoginRequest request) {
+            @RequestBody LoginRequest request,
+            HttpServletResponse response) {
 
-        LoginResponse response = authService.login(request);
-        return ResponseEntity.ok(ApiResponse.success("로그인 성공", response));
+        // 로그인 처리 (토큰 생성 포함)
+        LoginResponse loginResponse = authService.login(request);
+
+        // httpOnly Cookie에 JWT 저장
+        Cookie jwtCookie = new Cookie("accessToken", loginResponse.getAccessToken());
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setSecure(false);       // HTTPS 환경에서는 true로 변경
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge((int) (jwtTokenProvider.getExpirationTime() / 1000));
+        response.addCookie(jwtCookie);
+
+        // accessToken은 Cookie로 전달하므로 응답 바디에서 제외
+        LoginResponse safeResponse = LoginResponse.builder()
+                .user(loginResponse.getUser())
+                .build();
+
+        return ResponseEntity.ok(ApiResponse.success(safeResponse));
+    }
+
+    // 로그아웃 - Cookie 무효화
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
+        Cookie jwtCookie = new Cookie("accessToken", null);
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(0);           // 즉시 만료
+        response.addCookie(jwtCookie);
+
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     // 아이디 중복 확인
     @GetMapping("/check-username")
-    public ResponseEntity<ApiResponse<Boolean>> checkUsername(
-            @RequestParam String username) {
-
+    public ResponseEntity<ApiResponse<Boolean>> checkUsername(@RequestParam String username) {
         boolean available = authService.checkUsername(username);
-        String message = available ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.";
-        return ResponseEntity.ok(ApiResponse.success(message, available));
+        return ResponseEntity.ok(ApiResponse.success(available));
     }
 
     // 핸드폰 번호 중복 확인
     @GetMapping("/check-phone")
-    public ResponseEntity<ApiResponse<Boolean>> checkPhone(
-            @RequestParam String phone) {
-
+    public ResponseEntity<ApiResponse<Boolean>> checkPhone(@RequestParam String phone) {
         boolean available = authService.checkPhone(phone);
-        String message = available ? "사용 가능한 번호입니다." : "이미 등록된 번호입니다.";
-        return ResponseEntity.ok(ApiResponse.success(message, available));
+        return ResponseEntity.ok(ApiResponse.success(available));
     }
 }
