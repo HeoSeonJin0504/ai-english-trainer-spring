@@ -10,6 +10,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.aienglishtrainer.entity.User;
+import com.example.aienglishtrainer.exception.BusinessException;
+import com.example.aienglishtrainer.repository.UserRepository;
+import com.example.aienglishtrainer.security.SecurityUtil;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -17,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입
@@ -75,5 +81,14 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Boolean>> checkPhone(@RequestParam String phone) {
         boolean available = authService.checkPhone(phone);
         return ResponseEntity.ok(ApiResponse.success(available));
+    }
+
+    // 현재 로그인한 사용자 정보 조회
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> getMe() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+        return ResponseEntity.ok(ApiResponse.success(UserResponse.from(user)));
     }
 }

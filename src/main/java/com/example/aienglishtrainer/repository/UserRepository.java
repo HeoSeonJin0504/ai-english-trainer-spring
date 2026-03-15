@@ -26,4 +26,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 이메일 중복 확인
     boolean existsByEmail(String email);
+
+    // OAuth
+    /**
+     * provider + providerId로 기존 OAuth 회원 조회.
+     * CustomOAuth2UserService에서 기존 회원 여부를 확인할 때 사용.
+     * (Node.js의 User.findOne({ where: { provider, providerId } })와 동일)
+     */
+    Optional<User> findByProviderAndProviderId(String provider, String providerId);
 }

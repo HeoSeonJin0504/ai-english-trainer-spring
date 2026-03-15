@@ -31,6 +31,7 @@ dependencies {
 
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     // Database
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -46,7 +47,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // Google Cloud TTS
-    implementation 'com.google.cloud:google-cloud-texttospeech:2.54.0'
+    implementation 'com.google.cloud:google-cloud-texttospeech:2.87.0'
 
     // JSON 처리
     implementation 'com.google.code.gson:gson:2.11.0'
@@ -59,6 +60,16 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// 전이 의존성 강제 고정 (CVE-2025-55163 대응)
+configurations.configureEach {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if (details.requested.group == 'io.netty') {
+            details.useVersion '4.1.124.Final'
+            details.because 'CVE-2025-55163 패치 버전으로 Netty 전체 고정'
+        }
+    }
 }
 
 tasks.named('test') {
